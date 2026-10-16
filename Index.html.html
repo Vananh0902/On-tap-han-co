@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Luyện Thi Cấp Tốc Ngữ Pháp Hán Cổ (120 Câu)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Serif+TC:wght@600;700&display=swap');
+    body { font-family: 'Inter', sans-serif; }
+    .hanzi { font-family: 'Noto Serif TC', serif; }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+
+  <!-- Header -->
+  <header class="bg-amber-800 text-white shadow-md sticky top-0 z-30">
+    <div class="max-w-5xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+      <div>
+        <h1 class="text-lg md:text-xl font-bold flex items-center gap-2">
+          <span>📜</span> Ôn Thi Cấp Tốc: Ngữ Pháp Hán Cổ
+        </h1>
+        <p class="text-xs text-amber-200">Giáo Thọ Sư: NS. Huệ Chơn • Trọn bộ 120 câu đề cương kèm mẹo giải 3 giây</p>
+      </div>
+      <div class="flex flex-wrap gap-1.5">
+        <button onclick="switchMode('exam')" id="tab-exam" class="px-3 py-1.5 rounded-lg text-xs md:text-sm font-semibold bg-white text-amber-900 shadow-sm transition">
+          🎯 Thi Thử 20 Câu (10đ)
+        </button>
+        <button onclick="switchMode('practice')" id="tab-practice" class="px-3 py-1.5 rounded-lg text-xs md:text-sm font-semibold bg-amber-700 text-amber-100 hover:bg-amber-600 transition">
+          📚 Luyện 120 Câu Đề Cương
+        </button>
+        <button onclick="switchMode('cheatsheet')" id="tab-cheatsheet" class="px-3 py-1.5 rounded-lg text-xs md:text-sm font-semibold bg-amber-700 text-amber-100 hover:bg-amber-600 transition">
+          ⚡ Bảng Mẹo Nhìn Nhanh
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="max-w-5xl mx-auto w-full px-4 py-6 flex-1">
+
+    <!-- MODE 1: EXAM 20 QUESTIONS -->
+    <section id="view-exam" class="space-y-6">
+      <div class="bg-white rounded-2xl p-5 shadow-sm border border-amber-200 flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <h2 class="text-base md:text-lg font-bold text-slate-800">Đề Thi Thử Ngẫu Nhiên (20 Câu • 10 Điểm)</h2>
+          <p class="text-xs md:text-sm text-slate-600">Mô phỏng đúng cấu trúc đề thi sáng Thứ 7 (trích ngẫu nhiên từ 118 câu chính thức trong đề cương).</p>
+        </div>
+        <div class="flex items-center gap-3">
+          <div class="text-right">
+            <div class="text-xs text-slate-500">Điểm hiện tại</div>
+            <div id="exam-score-badge" class="text-xl font-bold text-amber-700">0.0 / 10</div>
+          </div>
+          <button onclick="startNewExam()" class="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white text-sm font-semibold rounded-xl shadow transition">
+            🔄 Đổi Đề 20 Câu Mới
+          </button>
+        </div>
+      </div>
+
+      <div id="exam-questions-list" class="space-y-4"></div>
+    </section>
+
+    <!-- MODE 2: PRACTICE ALL 120 QUESTIONS -->
+    <section id="view-practice" class="hidden space-y-5">
+      <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h2 class="text-base md:text-lg font-bold text-slate-800">Luyện Tập Toàn Bộ Đề Cương (Câu 1 – 120)</h2>
+            <p class="text-xs text-slate-500">Chọn bộ lọc bên dưới để luyện riêng các câu dễ nhầm hoặc các câu bị lỗi font mất chữ trong đề cương.</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <label class="flex items-center gap-1.5 text-xs md:text-sm font-medium text-amber-800 bg-amber-50 border border-amber-200 px-3 py-1.5 rounded-lg cursor-pointer">
+              <input type="checkbox" id="auto-show-hint" onchange="renderPracticeList()" class="rounded text-amber-600 focus:ring-amber-500">
+              Luôn hiện Mẹo giải nhanh
+            </label>
+            <button onclick="resetPractice()" class="px-3 py-1.5 text-xs font-medium bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition">
+              Làm lại từ đầu
+            </button>
+          </div>
+        </div>
+
+        <!-- Filter Pills -->
+        <div class="flex flex-wrap gap-2 pt-1 border-t border-slate-100">
+          <button onclick="setFilter('all')" id="filter-all" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-amber-700 text-white">
+            Tất cả (118 câu thi + 2 câu giảm tải)
+          </button>
+          <button onclick="setFilter('multi')" id="filter-multi" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200">
+            ⚠️ 7 Chữ Có Nhiều Vai Trò (35 câu)
+          </button>
+          <button onclick="setFilter('missing')" id="filter-missing" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200">
+            🔍 8 Câu Bị Lỗi Mất Chữ Trong File PDF
+          </button>
+          <button onclick="setFilter('fixed')" id="filter-fixed" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200">
+            ✅ Nhóm 1 Đáp Án Cố Định (85 câu)
+          </button>
+          <button onclick="setFilter('wrong')" id="filter-wrong" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100">
+            ❌ Câu Đang Chọn Sai (<span id="wrong-count">0</span>)
+          </button>
+        </div>
+
+        <!-- Progress bar -->
+        <div class="flex items-center justify-between text-xs text-slate-600 pt-1">
+          <span id="practice-stats">Đã làm: 0/120 • Đúng: 0</span>
+          <input type="text" id="search-input" oninput="renderPracticeList()" placeholder="Tìm số câu (vd: 15) hoặc chữ Hán (vd: 之, 其, 上)..." class="px-3 py-1 border border-slate-300 rounded-lg text-xs w-64 focus:outline-none focus:border-amber-600" />
+        </div>
+      </div>
+
+      <div id="practice-questions-list" class="space-y-4"></div>
+    </section>
+
+    <!-- MODE 3: CHEATSHEET -->
+    <section id="view-cheatsheet" class="hidden space-y-6">
+      <div class="bg-white rounded-2xl p-6 shadow-sm border border-amber-200 space-y-6">
+        <div class="border-b border-slate-100 pb-4">
+          <h2 class="text-xl font-bold text-amber-900">⚡ Bảng Mẹo Nhìn Nhanh Trong 3 Giây (Không Cần Biết Dịch)</h2>
+          <p class="text-sm text-slate-600 mt-1">Chỉ cần nhìn chữ Hán ở cuối đề bài ("Trong câu này, <b>[Chữ X]</b> là:") và áp dụng đúng 3 bước dưới đây:</p>
+        </div>
+
+        <!-- Step 1 -->
+        <div class="space-y-3">
+          <h3 class="text-base font-bold text-emerald-800 bg-emerald-50 px-3 py-2 rounded-lg border border-emerald-200">
+            BƯỚC 1: 7 Nhóm "Thấy Mặt Chữ Là Khoanh Luôn" (Chỉ có 1 đáp án duy nhất)
+          </h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+            <div class="p-3.5 rounded-xl border border-slate-200 bg-slate-50">
+              <div class="font-bold text-amber-900 mb-1">1. SỐ TỪ (4 câu)</div>
+              <p>Gặp chữ <span class="hanzi text-lg font-bold text-rose-700 bg-rose-50 px-1.5 rounded">兩</span> (lưỡng) hoặc <span class="hanzi text-lg font-bold text-rose-700 bg-rose-50 px-1.5 rounded">四</span> (tứ - hình vuông) $\rightarrow$ Khoanh <b>Số từ</b>.</p>
+              <p class="text-xs text-slate-500 mt-1">*Lưu ý: Câu 5 và 23 bị mất chữ 四 ở đề, nhìn trong câu thấy chữ 四 là khoanh Số từ.</p>
+            </div>
+            <div class="p-3.5 rounded-xl border border-slate-200 bg-slate-50">
+              <div class="font-bold text-amber-900 mb-1">2. TRỢ ĐỘNG TỪ (8 câu)</div>
+              <p>Gặp chữ <span class="hanzi text-lg font-bold text-rose-700 bg-rose-50 px-1.5 rounded">能</span> (năng) hoặc <span class="hanzi text-lg font-bold text-rose-700 bg-rose-50 px-1.5 rounded">可</span> (khả) $\rightarrow$ Khoanh <b>Trợ động từ</b>.</p>
+            </div>
+            <div class="p-3.5 rounded-xl border border-slate-200 bg-slate-50">
+              <div class="font-bold text-amber-900 mb-1">3. LIÊN TỪ CỐ ĐỊNH (4 câu)</div>
+              <p>Gặp chữ <span class="hanzi text-lg font-bold text-rose-700 bg-rose-50 px-1.5 rounded">與</span> (dữ - nhiều nét phức tạp) $\rightarrow$ Khoanh <b>Liên từ</b>.</p>
+            </div>
+            <div class="p-3.5 rounded-xl border border-slate-200 bg-slate-50">
+              <div class="font-bold text-amber-900 mb-1">4. TÍNH TỪ DUY NHẤT (1 câu)</div>
+              <p>Gặp chữ <span class="hanzi text-lg font-bold text-rose-700 bg-rose-50 px-1.5 rounded">黃</span> (hoàng - câu 115) $\rightarrow$ Khoanh <b>Tính từ</b>.</p>
+            </div>
+            <div class="p-3.5 rounded-xl border border-slate-200 bg-slate-50">
+              <div class="font-bold text-amber-900 mb-1">5. PHƯƠNG VỊ TỪ CỐ ĐỊNH (5 câu)</div>
+              <p>Gặp <span class="hanzi text-lg font-bold text-rose-700 bg-rose-50 px-1.5 rounded">下</span>, <span class="hanzi text-lg font-bold text-rose-700 bg-rose-50 px-1.5 rounded">旁</span>, <span class="hanzi text-lg font-bold text-rose-700 bg-rose-50 px-1.5 rounded">中</span>, <span class="hanzi text-lg font-bold text-rose-700 bg-rose-50 px-1.5 rounded">外</span> $\rightarrow$ Khoanh <b>Phương vị từ</b>.</p>
+              <p class="text-xs text-slate-500 mt-1">*Lưu ý: Câu 27 (有農夫住山下) bị mất chữ 下 ở đề.</p>
+            </div>
+            <div class="p-3.5 rounded-xl border border-slate-200 bg-slate-50">
+              <div class="font-bold text-amber-900 mb-1">6. TRỢ TỪ CỐ ĐỊNH (8 câu)</div>
+              <p>Gặp <span class="hanzi text-lg font-bold text-rose-700 bg-rose-50 px-1.5 rounded">也</span>, <span class="hanzi text-lg font-bold text-rose-700 bg-rose-50 px-1.5 rounded">者</span>, <span class="hanzi text-lg font-bold text-rose-700 bg-rose-50 px-1.5 rounded">乎</span>, <span class="hanzi text-lg font-bold text-rose-700 bg-rose-50 px-1.5 rounded">矣</span> $\rightarrow$ Khoanh <b>Trợ từ</b>.</p>
+            </div>
+            <div class="p-3.5 rounded-xl border border-slate-200 bg-slate-50 md:col-span-2">
+              <div class="font-bold text-amber-900 mb-1">7. ĐẠI TỪ CỐ ĐỊNH (13 câu)</div>
+              <p>Gặp <span class="hanzi text-lg font-bold text-rose-700 bg-rose-50 px-1.5 rounded">其</span> (7 câu), <span class="hanzi text-lg font-bold text-rose-700 bg-rose-50 px-1.5 rounded">吾</span>, <span class="hanzi text-lg font-bold text-rose-700 bg-rose-50 px-1.5 rounded">焉</span> (câu 94 mất chữ ở đề), <span class="hanzi text-lg font-bold text-rose-700 bg-rose-50 px-1.5 rounded">自</span>, <span class="hanzi text-lg font-bold text-rose-700 bg-rose-50 px-1.5 rounded">我</span>, <span class="hanzi text-lg font-bold text-rose-700 bg-rose-50 px-1.5 rounded">爾</span>, <span class="hanzi text-lg font-bold text-rose-700 bg-rose-50 px-1.5 rounded">各</span> $\rightarrow$ Khoanh <b>Đại từ</b>.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="space-y-3">
+          <h3 class="text-base font-bold text-blue-800 bg-blue-50 px-3 py-2 rounded-lg border border-blue-200">
+            BƯỚC 2: 18 Chữ Cố Định Là PHÓ TỪ (Chiếm 47 câu - Cứ loại trừ Bước 1 & Bước 3 là khoanh Phó từ!)
+          </h3>
+          <div class="p-4 rounded-xl border border-slate-200 bg-slate-50 text-sm space-y-2">
+            <p>Các chữ: <span class="hanzi text-lg font-bold text-blue-800">將 (5), 同 (5), 亦 (4), 漸 (4), 均 (3), 皆 (3), 不 (3), 一 (2), 初 (2), 惟 (2), 甚 (2), 終 (2), 常 (2), 忽 (2), 又 (1), 昔 (1), 已 (1), 弗 (1)</span> đều <b>100% là Phó từ</b>.</p>
+            <p class="text-xs text-slate-600">💡 <b>Mẹo phòng thi:</b> Nếu chữ đề hỏi không nằm ở Bước 1 và không phải 7 chữ ở Bước 3 $\rightarrow$ Khoanh thẳng <b>Phó từ</b>!</p>
+          </div>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="space-y-3">
+          <h3 class="text-base font-bold text-rose-800 bg-rose-50 px-3 py-2 rounded-lg border border-rose-200">
+            BƯỚC 3: Mẹo Nhìn Vị Trí Cho "7 Chữ Có Từ 2 Vai Trò Trở Lên" (35 câu)
+          </h3>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-xs md:text-sm">
+              <thead>
+                <tr class="bg-slate-100 text-slate-700 border-b border-slate-200">
+                  <th class="p-3 font-bold">Chữ Hán</th>
+                  <th class="p-3 font-bold">Dấu hiệu nhìn bằng mắt (Không cần dịch)</th>
+                  <th class="p-3 font-bold">Khoanh đáp án</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-200">
+                <tr>
+                  <td class="p-3 hanzi text-xl font-bold text-amber-900">之 <span class="font-sans text-xs font-normal text-slate-500">(16 câu)</span></td>
+                  <td class="p-3">
+                    • Đứng <b>sát trước dấu chấm (。) hoặc dấu phẩy (,)</b> (vd: <code>...擊之03。</code>, <code>...生之02,</code>, <code>...而都之。</code>)<br>
+                    • Đứng <b>lưng chừng giữa câu</b> (không sát dấu chấm/phẩy)
+                  </td>
+                  <td class="p-3 font-semibold">
+                    • <span class="text-indigo-700">Đại từ</span> (7 câu)<br>
+                    • <span class="text-emerald-700">Trợ từ</span> hoặc <span class="text-emerald-700">Trợ từ kết cấu</span> (thấy cái nào trong A,B,C,D thì khoanh cái đó)
+                  </td>
+                </tr>
+                <tr>
+                  <td class="p-3 hanzi text-xl font-bold text-amber-900">上 <span class="font-sans text-xs font-normal text-slate-500">(5 câu)</span></td>
+                  <td class="p-3">
+                    • Đứng ngay <b>ĐẦU CÂU</b> (<code>上求佛道, 下化眾生</code> - câu 9)<br>
+                    • Đứng <b>GIỮA hoặc CUỐI CÂU</b> (<code>大路上</code>, <code>同坐岸上</code>, <code>壁上有影</code>)
+                  </td>
+                  <td class="p-3 font-semibold">
+                    • <span class="text-blue-700">Phó từ</span> (câu 9)<br>
+                    • <span class="text-amber-700">Phương vị từ</span> (câu 8, 35, 51, 58)
+                  </td>
+                </tr>
+                <tr>
+                  <td class="p-3 hanzi text-xl font-bold text-amber-900">是 <span class="font-sans text-xs font-normal text-slate-500">(3 câu)</span></td>
+                  <td class="p-3">
+                    • Đi liền với chữ 為 tạo thành <b><code>是為...</code></b> (câu 6, 65)<br>
+                    • Câu kết thúc bằng chữ <b><code>也</code></b> (<code>富與貴, 是人之所欲也</code> - câu 7)
+                  </td>
+                  <td class="p-3 font-semibold">
+                    • <span class="text-indigo-700">Đại từ</span> (câu 6, 65)<br>
+                    • <span class="text-rose-700">Động từ</span> (câu 7)
+                  </td>
+                </tr>
+                <tr>
+                  <td class="p-3 hanzi text-xl font-bold text-amber-900">後 <span class="font-sans text-xs font-normal text-slate-500">(2 câu)</span></td>
+                  <td class="p-3">
+                    • Đứng <b>TRƯỚC dấu phẩy</b> (<code>霜降後, 葉漸黃</code> - câu 114)<br>
+                    • Đứng <b>SAU dấu phẩy</b> (<code>前不見古人, 後不見來者</code> - câu 77)
+                  </td>
+                  <td class="p-3 font-semibold">
+                    • <span class="text-amber-700">Phương vị từ</span> (câu 114)<br>
+                    • <span class="text-blue-700">Phó từ</span> (câu 77)
+                  </td>
+                </tr>
+                <tr>
+                  <td class="p-3 hanzi text-xl font-bold text-amber-900">子 <span class="font-sans text-xs font-normal text-slate-500">(2 câu)</span></td>
+                  <td class="p-3">
+                    • Câu có <b>dấu chấm hỏi <code>?</code></b> (<code>以子之矛...何如?</code> - câu 80)<br>
+                    • Câu <b>không có dấu hỏi</b> (<code>父慈子孝, 家庭幸福</code> - câu 81)
+                  </td>
+                  <td class="p-3 font-semibold">
+                    • <span class="text-indigo-700">Đại từ</span> (câu 80)<br>
+                    • <span class="text-teal-700">Danh từ</span> (câu 81)
+                  </td>
+                </tr>
+                <tr>
+                  <td class="p-3 hanzi text-xl font-bold text-amber-900">因 <span class="font-sans text-xs font-normal text-slate-500">(2 câu)</span></td>
+                  <td class="p-3">
+                    • Câu chỉ có <b>1 chữ 因</b> (<code>因名昇龍, 而都之</code> - câu 95)<br>
+                    • Câu lặp lại <b>2 chữ 因</b> (<code>因戒生, 因定發慧</code> - câu 96)
+                  </td>
+                  <td class="p-3 font-semibold">
+                    • <span class="text-purple-700">Liên từ</span> (câu 95)<br>
+                    • <span class="text-orange-700">Giới từ</span> (câu 96)
+                  </td>
+                </tr>
+                <tr>
+                  <td class="p-3 hanzi text-xl font-bold text-amber-900">即 <span class="font-sans text-xs font-normal text-slate-500">(2 câu)</span></td>
+                  <td class="p-3">
+                    • Câu ngắn <b>4 chữ</b> (<code>覺即覺悟</code> - câu 109)<br>
+                    • Câu dài <b>có dấu phẩy</b> (<code>因名昇龍, 即今之京城也</code> - câu 108)
+                  </td>
+                  <td class="p-3 font-semibold">
+                    • <span class="text-blue-700">Phó từ</span> (câu 109)<br>
+                    • <span class="text-rose-700">Động từ</span> (câu 108)
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    // Full Database of 120 Questions from the PDF
+    const QUESTIONS = [
+      { id: 1, sentence: "梧桐兩株。", target: "兩", options: ["Trợ từ", "Số từ", "Phó từ", "Liên từ"], ans: 1, multi: false, missing: false, tip: "Chữ 兩 (lưỡng = 2) luôn cố định 100% là Số từ." },
+      { id: 2, sentence: "大門開, 兩客來, 一老一少。我問客姓, 客問我名。", target: "一", options: ["Trợ từ", "Số từ", "Phó từ", "Tính từ"], ans: 2, multi: false, missing: true, tip: "⚠️ Câu 2 bị lỗi mất chữ 一 ở đề trong PDF. Chữ 一 trong cấu trúc '一老一少' là Phó từ (một bên... một bên...)." },
+      { id: 3, sentence: "河間兩舟, 一去一來。", target: "一", options: ["Trợ từ", "Số từ", "Tính từ", "Phó từ"], ans: 3, multi: false, missing: true, tip: "⚠️ Câu 3 bị lỗi mất chữ 一 ở đề trong PDF. Chữ 一 trong '一去一來' là Phó từ." },
+      { id: 4, sentence: "其角與皮, 皆可制器。", target: "其", options: ["Đại từ", "Giới từ", "Phó từ", "Trợ từ"], ans: 0, multi: false, missing: false, tip: "Chữ 其 (kỳ) xuất hiện 7 câu, luôn cố định 100% là Đại từ." },
+      { id: 5, sentence: "春夏秋冬, 是為四季。", target: "四", options: ["Trợ từ", "Số từ", "Liên từ", "Phó từ"], ans: 1, multi: false, missing: true, tip: "⚠️ Câu 5 bị lỗi mất chữ 四 (tứ = 4) ở đề trong PDF. Cứ thấy câu này bị khuyết chữ hoặc hỏi chữ 四 là khoanh Số từ." },
+      { id: 6, sentence: "今爾向日而行, 是為東方。", target: "是", options: ["Đại từ", "Phó từ", "Giới từ", "Trợ từ"], ans: 0, multi: true, missing: false, tip: "Mẹo chữ 是: Đi liền trước chữ 為 ('是為...') -> Khoanh Đại từ." },
+      { id: 7, sentence: "富與貴, 是人之所欲也。", target: "是", options: ["Phó từ", "Giới từ", "Động từ", "Trợ từ"], ans: 2, multi: true, missing: false, tip: "Mẹo chữ 是: Câu kết thúc bằng chữ 也 ('...欲也'), không có chữ 為 -> Khoanh Động từ." },
+      { id: 8, sentence: "大路上, 人往來。", target: "上", options: ["Đại từ", "Phó từ", "Phương vị từ", "Giới từ"], ans: 2, multi: true, missing: false, tip: "Mẹo chữ 上: Không đứng đầu câu (đứng sau 大路) -> Khoanh Phương vị từ." },
+      { id: 9, sentence: "上求佛道, 下化眾生。", target: "上", options: ["Phó từ", "Đại từ", "Trợ từ", "Giới từ"], ans: 0, multi: true, missing: false, tip: "Mẹo chữ 上: Đứng ngay ĐẦU CÂU ('上求佛道...') -> Khoanh Phó từ." },
+      { id: 10, sentence: "天氣各異。", target: "各", options: ["Đại từ", "Trợ từ", "Phó từ", "Giới từ"], ans: 0, multi: false, missing: false, tip: "Chữ 各 (các = mỗi, từng) luôn cố định là Đại từ." },
+      { id: 11, sentence: "肝脾胃小腸均屬消化之機官。", target: "均", options: ["Liên từ", "Phó từ", "Trợ từ", "Giới từ"], ans: 1, multi: false, missing: false, tip: "Chữ 均 (quân = đều) xuất hiện 3 câu, luôn cố định là Phó từ." },
+      { id: 12, sentence: "日初升, 荷鋤出。", target: "初", options: ["Trợ từ", "Liên từ", "Giới từ", "Phó từ"], ans: 3, multi: false, missing: false, tip: "Chữ 初 (sơ = mới, vừa mới) luôn cố định là Phó từ." },
+      { id: 13, sentence: "日將落, 荷鋤歸。", target: "將", options: ["Giới từ", "Phó từ", "Trợ từ", "Liên từ"], ans: 1, multi: false, missing: false, tip: "Chữ 將 (tương = sắp) xuất hiện 5 câu, luôn cố định 100% là Phó từ." },
+      { id: 14, sentence: "其人弗能應也。", target: "也", options: ["Liên từ", "Giới từ", "Phó từ", "Trợ từ"], ans: 3, multi: false, missing: false, removed: true, tip: "Chữ 也 (dã) đứng cuối câu luôn cố định là Trợ từ (Lưu ý: Đề cương ghi 'File mới xóa câu 14')." },
+      { id: 15, sentence: "即今之01京城也。", target: "之01", options: ["Trợ từ kết cấu", "Phó từ", "Giới từ", "Liên từ"], ans: 0, multi: true, missing: false, tip: "Mẹo chữ 之: Đứng giữa câu (không sát dấu chấm/phẩy) -> Tìm đáp án có chữ 'Trợ từ kết cấu' hoặc 'Trợ từ' để khoanh." },
+      { id: 16, sentence: "學之02精進, 行之02堅固。", target: "之02", options: ["Phó từ", "Giới từ", "Trợ từ", "Liên từ"], ans: 2, multi: true, missing: false, tip: "Mẹo chữ 之: Đứng giữa câu -> Khoanh đáp án có chữ 'Trợ từ'." },
+      { id: 17, sentence: "人言: 鵲之鳴吉, 鴉之鳴凶。", target: "之", options: ["Giới từ", "Liên từ", "Phó từ", "Trợ từ"], ans: 3, multi: true, missing: false, tip: "Mẹo chữ 之: Đứng giữa câu -> Khoanh đáp án có chữ 'Trợ từ'." },
+      { id: 18, sentence: "鴉鳴於樹上, 兒以石擊之03。", target: "之03", options: ["Phó từ", "Đại từ", "Trợ từ", "Liên từ"], ans: 1, multi: true, missing: false, tip: "Mẹo chữ 之: Đứng CUỐI CÂU sát ngay trước dấu chấm (擊之03。) -> Khoanh Đại từ." },
+      { id: 19, sentence: "有朋自遠方來, 不亦樂乎。", target: "不", options: ["Liên từ", "Trợ từ", "Phó từ", "Giới từ"], ans: 2, multi: false, missing: true, removed: true, tip: "Chữ 不 (bất = không) luôn là Phó từ (Lưu ý: Đề cương ghi 'File mới xóa câu 19' và bị khuyết chữ 不)." },
+      { id: 20, sentence: "楚人有鬻矛與盾者。", target: "者", options: ["Trợ từ", "Giới từ", "Liên từ", "Phó từ"], ans: 0, multi: false, missing: false, tip: "Chữ 者 (giả) đứng cuối câu luôn cố định là Trợ từ." },
+      { id: 21, sentence: "明月將出。", target: "將", options: ["Trợ từ", "Liên từ", "Giới từ", "Phó từ"], ans: 3, multi: false, missing: false, tip: "Chữ 將 (tương = sắp) luôn cố định 100% là Phó từ." },
+      { id: 22, sentence: "人之將死, 其言也善。", target: "將", options: ["Giới từ", "Liên từ", "Phó từ", "Trợ từ"], ans: 2, multi: false, missing: false, tip: "Chữ 將 (tương = sắp) luôn cố định 100% là Phó từ." },
+      { id: 23, sentence: "取火燃燭, 光照四壁。", target: "四", options: ["Trợ từ", "Số từ", "Liên từ", "Phó từ"], ans: 1, multi: false, missing: true, tip: "⚠️ Câu 23 bị lỗi mất chữ 四 (tứ = 4) ở đề trong PDF. Nhìn trong câu thấy 四壁 là khoanh Số từ." },
+      { id: 24, sentence: "人坐影亦坐, 人行影亦行。", target: "亦", options: ["Trợ từ", "Phó từ", "Giới từ", "Liên từ"], ans: 1, multi: false, missing: false, tip: "Chữ 亦 (diệc = cũng) xuất hiện 4 câu, luôn cố định 100% là Phó từ." },
+      { id: 25, sentence: "全家均好。", target: "均", options: ["Liên từ", "Giới từ", "Trợ từ", "Phó từ"], ans: 3, multi: false, missing: false, tip: "Chữ 均 (quân = đều) luôn cố định là Phó từ." },
+      { id: 26, sentence: "譽其盾之堅, 物莫能陷也。", target: "其", options: ["Trợ từ", "Giới từ", "Đại từ", "Phó từ"], ans: 2, multi: false, missing: false, tip: "Chữ 其 (kỳ) luôn cố định 100% là Đại từ." },
+      { id: 27, sentence: "有農夫住山下。", target: "下", options: ["Giới từ", "Phương vị từ", "Liên từ", "Phó từ"], ans: 1, multi: false, missing: true, tip: "⚠️ Câu 27 bị lỗi mất chữ 下 (hạ = dưới) ở đề trong PDF. Chữ 下 luôn cố định là Phương vị từ." },
+      { id: 28, sentence: "腦能接認感覺, 亦能發生思想。", target: "亦", options: ["Liên từ", "Giới từ", "Trợ từ", "Phó từ"], ans: 3, multi: false, missing: false, tip: "Chữ 亦 (diệc = cũng) luôn cố định là Phó từ." },
+      { id: 29, sentence: "兄招弟同坐溫課。", target: "同", options: ["Trợ từ", "Giới từ", "Phó từ", "Liên từ"], ans: 2, multi: false, missing: false, tip: "Chữ 同 (đồng = cùng) xuất hiện 5 câu, luôn cố định 100% là Phó từ." },
+      { id: 30, sentence: "百花零落, 惟菊獨盛。", target: "惟", options: ["Liên từ", "Phó từ", "Giới từ", "Trợ từ"], ans: 1, multi: false, missing: false, tip: "Chữ 惟 (duy = chỉ) luôn cố định là Phó từ." },
+      { id: 31, sentence: "老幼均安。", target: "均", options: ["Giới từ", "Phó từ", "Liên từ", "Trợ từ"], ans: 1, multi: false, missing: false, tip: "Chữ 均 (quân = đều) luôn cố định là Phó từ." },
+      { id: 32, sentence: "牛力大, 能挽車。", target: "能", options: ["Liên từ", "Trợ động từ", "Giới từ", "Trợ từ"], ans: 1, multi: false, missing: false, tip: "Chữ 能 (năng = có thể) luôn cố định 100% là Trợ động từ." },
+      { id: 33, sentence: "同往採菱。", target: "同", options: ["Giới từ", "Liên từ", "Phó từ", "Trợ từ"], ans: 2, multi: false, missing: false, tip: "Chữ 同 (đồng = cùng) luôn cố định 100% là Phó từ." },
+      { id: 34, sentence: "姊姊, 妹妹攜手同遊。", target: "同", options: ["Phó từ", "Liên từ", "Giới từ", "Trợ từ"], ans: 0, multi: false, missing: false, tip: "Chữ 同 (đồng = cùng) luôn cố định 100% là Phó từ." },
+      { id: 35, sentence: "同坐岸上。", target: "上", options: ["Phó từ", "Phương vị từ", "Liên từ", "Trợ từ"], ans: 1, multi: true, missing: false, tip: "Mẹo chữ 上: Đứng cuối câu (sau chữ 岸) -> Khoanh Phương vị từ." },
+      { id: 36, sentence: "大腸, 腎與膀胱皆任排泄之役。", target: "皆", options: ["Liên từ", "Trợ từ", "Phó từ", "Giới từ"], ans: 2, multi: false, missing: false, tip: "Chữ 皆 (giai = đều) xuất hiện 3 câu, luôn cố định là Phó từ." },
+      { id: 37, sentence: "吾矛之利, 物無不陷也。", target: "不", options: ["Liên từ", "Giới từ", "Trợ từ", "Phó từ"], ans: 3, multi: false, missing: false, tip: "Chữ 不 (bất = không) luôn cố định là Phó từ." },
+      { id: 38, sentence: "齒甚銳。", target: "甚", options: ["Liên từ", "Giới từ", "Phó từ", "Trợ từ"], ans: 2, multi: false, missing: false, tip: "Chữ 甚 (thậm = rất) luôn cố định là Phó từ." },
+      { id: 39, sentence: "故其知識終不如人。", target: "終", options: ["Liên từ", "Trợ từ", "Phó từ", "Giới từ"], ans: 2, multi: false, missing: false, tip: "Chữ 終 (chung = rốt cuộc) luôn cố định là Phó từ." },
+      { id: 40, sentence: "終不可以見。", target: "終", options: ["Trợ từ", "Liên từ", "Giới từ", "Phó từ"], ans: 3, multi: false, missing: false, tip: "Chữ 終 (chung = rốt cuộc) luôn cố định là Phó từ." },
+      { id: 41, sentence: "惟不能讀書。", target: "惟", options: ["Trợ từ", "Phó từ", "Liên từ", "Tính từ"], ans: 1, multi: false, missing: false, tip: "Chữ 惟 (duy = chỉ) luôn cố định là Phó từ." },
+      { id: 42, sentence: "同坐岸上。", target: "同", options: ["Trợ từ", "Phó từ", "Liên từ", "Giới từ"], ans: 1, multi: false, missing: false, tip: "Chữ 同 (đồng = cùng) luôn cố định 100% là Phó từ." },
+      { id: 43, sentence: "我等與眾生, 皆共成佛道。", target: "皆", options: ["Giới từ", "Liên từ", "Phó từ", "Trợ từ"], ans: 2, multi: false, missing: false, tip: "Chữ 皆 (giai = đều) luôn cố định là Phó từ." },
+      { id: 44, sentence: "霜降後, 葉漸黃。", target: "漸", options: ["Liên từ", "Phó từ", "Trợ từ", "Giới từ"], ans: 1, multi: false, missing: false, tip: "Chữ 漸 (tiệm = dần dần) xuất hiện 4 câu, luôn cố định là Phó từ." },
+      { id: 45, sentence: "漸入佳境。", target: "漸", options: ["Phó từ", "Giới từ", "Trợ từ", "Liên từ"], ans: 0, multi: false, missing: false, tip: "Chữ 漸 (tiệm = dần dần) luôn cố định là Phó từ." },
+      { id: 46, sentence: "循序漸進。", target: "漸", options: ["Trợ từ", "Phó từ", "Giới từ", "Liên từ"], ans: 1, multi: false, missing: false, tip: "Chữ 漸 (tiệm = dần dần) luôn cố định là Phó từ." },
+      { id: 47, sentence: "吾矛之利, 物無不陷也。", target: "也", options: ["Giới từ", "Trợ từ", "Liên từ", "Phó từ"], ans: 1, multi: false, missing: false, tip: "Chữ 也 (dã) đứng cuối câu luôn cố định 100% là Trợ từ." },
+      { id: 48, sentence: "莊兒將入學。", target: "將", options: ["Liên từ", "Trợ từ", "Phó từ", "Giới từ"], ans: 2, multi: false, missing: false, tip: "Chữ 將 (tương = sắp) luôn cố định là Phó từ." },
+      { id: 49, sentence: "又能營巢。", target: "又", options: ["Trợ từ", "Phó từ", "Giới từ", "Liên từ"], ans: 1, multi: false, missing: false, tip: "Chữ 又 (hựu = lại) luôn cố định là Phó từ." },
+      { id: 50, sentence: "人在燭旁, 壁上有影。", target: "旁", options: ["Phương vị từ", "Liên từ", "Giới từ", "Phó từ"], ans: 0, multi: false, missing: false, tip: "Chữ 旁 (bàng = bên cạnh) luôn cố định là Phương vị từ." },
+      { id: 51, sentence: "人在燭旁, 壁上有影。", target: "上", options: ["Phương vị từ", "Giới từ", "Phó từ", "Liên từ"], ans: 0, multi: true, missing: false, tip: "Mẹo chữ 上: Đứng giữa câu (sau chữ 壁) -> Khoanh Phương vị từ." },
+      { id: 52, sentence: "人坐影亦坐。", target: "亦", options: ["Liên từ", "Giới từ", "Trợ từ", "Phó từ"], ans: 3, multi: false, missing: false, tip: "Chữ 亦 (diệc = cũng) luôn cố định là Phó từ." },
+      { id: 53, sentence: "人行影亦行。", target: "亦", options: ["Trợ từ", "Giới từ", "Phó từ", "Liên từ"], ans: 2, multi: false, missing: false, tip: "Chữ 亦 (diệc = cũng) luôn cố định là Phó từ." },
+      { id: 54, sentence: "雨將晴, 河水清。", target: "將", options: ["Trợ từ", "Phó từ", "Giới từ", "Liên từ"], ans: 1, multi: false, missing: false, tip: "Chữ 將 (tương = sắp) luôn cố định là Phó từ." },
+      { id: 55, sentence: "山之01大者, 草, 木生之, 禽獸居之。", target: "之", options: ["Giới từ", "Liên từ", "Phó từ", "Trợ từ"], ans: 3, multi: true, missing: false, tip: "Mẹo chữ 之 (之01): Đứng giữa cụm '山之01大者' (không sát dấu chấm/phẩy) -> Khoanh Trợ từ." },
+      { id: 56, sentence: "鬚眉皆白。", target: "皆", options: ["Giới từ", "Liên từ", "Phó từ", "Trợ từ"], ans: 2, multi: false, missing: false, tip: "Chữ 皆 (giai = đều) luôn cố định là Phó từ." },
+      { id: 57, sentence: "常居穴中。", target: "常", options: ["Liên từ", "Trợ từ", "Giới từ", "Phó từ"], ans: 3, multi: false, missing: false, tip: "Chữ 常 (thường = luôn) luôn cố định là Phó từ." },
+      { id: 58, sentence: "同坐岸上。", target: "上", options: ["Phó từ", "Liên từ", "Giới từ", "Phương vị từ"], ans: 3, multi: true, missing: false, tip: "Mẹo chữ 上: Đứng cuối câu (sau chữ 岸) -> Khoanh Phương vị từ." },
+      { id: 59, sentence: "牛力大, 能耕田。", target: "能", options: ["Trợ từ", "Trợ động từ", "Giới từ", "Liên từ"], ans: 1, multi: false, missing: false, tip: "Chữ 能 (năng) luôn cố định là Trợ động từ." },
+      { id: 60, sentence: "有福同享, 有難同當。", target: "同", options: ["Phó từ", "Liên từ", "Giới từ", "Trợ từ"], ans: 0, multi: false, missing: false, tip: "Chữ 同 (đồng = cùng) luôn cố định là Phó từ." },
+      { id: 61, sentence: "其肉可食。", target: "其", options: ["Phó từ", "Trợ từ", "Đại từ", "Giới từ"], ans: 2, multi: false, missing: false, tip: "Chữ 其 (kỳ) luôn cố định 100% là Đại từ." },
+      { id: 62, sentence: "譽其盾之堅, 物莫能陷也。", target: "之", options: ["Phó từ", "Giới từ", "Trợ từ", "Liên từ"], ans: 2, multi: true, missing: false, tip: "Mẹo chữ 之: Đứng giữa cụm '盾之堅' (không sát dấu câu) -> Khoanh Trợ từ." },
+      { id: 63, sentence: "其乳可飲。", target: "其", options: ["Phó từ", "Trợ từ", "Đại từ", "Giới từ"], ans: 2, multi: false, missing: false, tip: "Chữ 其 (kỳ) luôn cố định 100% là Đại từ." },
+      { id: 64, sentence: "其乳可飲。", target: "可", options: ["Liên từ", "Trợ từ", "Trợ động từ", "Giới từ"], ans: 2, multi: false, missing: false, tip: "Chữ 可 (khả = có thể) luôn cố định 100% là Trợ động từ." },
+      { id: 65, sentence: "春夏秋冬, 是為四季。", target: "是", options: ["Giới từ", "Đại từ", "Trợ từ", "Phó từ"], ans: 1, multi: true, missing: false, tip: "Mẹo chữ 是: Đi liền trước chữ 為 ('是為...') -> Khoanh Đại từ." },
+      { id: 66, sentence: "王乃與妹貳起兵攻之。", target: "之", options: ["Phó từ", "Trợ từ", "Giới từ", "Đại từ"], ans: 3, multi: true, missing: false, tip: "Mẹo chữ 之: Đứng CUỐI CÂU sát trước dấu chấm ('...攻之。') -> Khoanh Đại từ." },
+      { id: 67, sentence: "天初晚, 月光明。", target: "初", options: ["Phó từ", "Giới từ", "Trợ từ", "Liên từ"], ans: 0, multi: false, missing: false, tip: "Chữ 初 (sơ = vừa mới) luôn cố định là Phó từ." },
+      { id: 68, sentence: "我家之人甚多。", target: "甚", options: ["Liên từ", "Phó từ", "Trợ từ", "Giới từ"], ans: 1, multi: false, missing: false, tip: "Chữ 甚 (thậm = rất) luôn cố định là Phó từ." },
+      { id: 69, sentence: "其肉可食。", target: "可", options: ["Trợ động từ", "Giới từ", "Trợ từ", "Liên từ"], ans: 0, multi: false, missing: false, tip: "Chữ 可 (khả) luôn cố định 100% là Trợ động từ." },
+      { id: 70, sentence: "無骨人不能立。無筋人不能舉動。", target: "不", options: ["Giới từ", "Liên từ", "Trợ từ", "Phó từ"], ans: 3, multi: false, missing: false, tip: "Chữ 不 (bất = không) luôn cố định là Phó từ." },
+      { id: 71, sentence: "其角與皮, 皆可制器。", target: "與", options: ["Liên từ", "Trợ từ", "Giới từ", "Phó từ"], ans: 0, multi: false, missing: false, tip: "Chữ 與 (dữ = và) luôn cố định 100% là Liên từ." },
+      { id: 72, sentence: "山之大者, 草, 木生之02, 禽獸居之。", target: "之02", options: ["Giới từ", "Đại từ", "Trợ từ", "Phó từ"], ans: 1, multi: true, missing: false, tip: "Mẹo chữ 之 (之02): Đứng sát ngay trước dấu phẩy ('...生之02,') -> Khoanh Đại từ." },
+      { id: 73, sentence: "譽其盾之堅, 物莫能陷也。", target: "能", options: ["Liên từ", "Giới từ", "Trợ động từ", "Trợ từ"], ans: 2, multi: false, missing: false, tip: "Chữ 能 (năng) luôn cố định 100% là Trợ động từ." },
+      { id: 74, sentence: "譽其盾之堅, 物莫能陷也。", target: "也", options: ["Trợ từ", "Giới từ", "Liên từ", "Phó từ"], ans: 0, multi: false, missing: false, tip: "Chữ 也 (dã) luôn cố định 100% là Trợ từ." },
+      { id: 75, sentence: "俄而又譽其矛。", target: "其", options: ["Giới từ", "Đại từ", "Phó từ", "Trợ từ"], ans: 1, multi: false, missing: false, tip: "Chữ 其 (kỳ) luôn cố định 100% là Đại từ." },
+      { id: 76, sentence: "吾矛之利, 物無不陷也。", target: "吾", options: ["Đại từ", "Trợ từ", "Giới từ", "Phó từ"], ans: 0, multi: false, missing: false, tip: "Chữ 吾 (ngô = ta, tôi) luôn cố định là Đại từ." },
+      { id: 77, sentence: "前不見古人, 後不見來者。", target: "後", options: ["Giới từ", "Phó từ", "Trợ từ", "Liên từ"], ans: 1, multi: true, missing: false, tip: "Mẹo chữ 後: Đứng SAU dấu phẩy (', 後不見來者') -> Khoanh Phó từ." },
+      { id: 78, sentence: "其角與皮, 皆可制器。", target: "可", options: ["Giới từ", "Liên từ", "Trợ từ", "Trợ động từ"], ans: 3, multi: false, missing: false, tip: "Chữ 可 (khả) luôn cố định 100% là Trợ động từ." },
+      { id: 79, sentence: "竹簾外, 兩燕子, 忽飛來, 忽飛去。", target: "忽", options: ["Giới từ", "Trợ từ", "Phó từ", "Liên từ"], ans: 2, multi: false, missing: false, tip: "Chữ 忽 (hốt = bỗng, chợt) luôn cố định là Phó từ." },
+      { id: 80, sentence: "以子之矛, 陷子之盾, 何如?。", target: "子", options: ["Trợ từ", "Giới từ", "Phó từ", "Đại từ"], ans: 3, multi: true, missing: false, tip: "Mẹo chữ 子: Trong câu CÓ dấu chấm hỏi '?' -> Khoanh Đại từ (nghĩa là 'ngài, anh')." },
+      { id: 81, sentence: "父慈子孝, 家庭幸福。", target: "子", options: ["Liên từ", "Giới từ", "Danh từ", "Phó từ"], ans: 2, multi: true, missing: false, tip: "Mẹo chữ 子: Câu KHÔNG có dấu chấm hỏi ('父慈子孝') -> Khoanh Danh từ (nghĩa là 'người con')." },
+      { id: 82, sentence: "昇龍城昔號龍编地。", target: "昔", options: ["Giới từ", "Trợ từ", "Liên từ", "Phó từ"], ans: 3, multi: false, missing: false, tip: "Chữ 昔 (tích = xưa) luôn cố định là Phó từ." },
+      { id: 83, sentence: "王, 姓徵, 諱側, 貉將之女。", target: "之", options: ["Trợ từ kết cấu", "Liên từ", "Phó từ", "Giới từ"], ans: 0, multi: true, missing: false, tip: "Mẹo chữ 之: Đứng giữa cụm '貉將之女' -> Khoanh Trợ từ kết cấu." },
+      { id: 84, sentence: "舟已行矣, 而劍不行。", target: "已", options: ["Liên từ", "Trợ từ", "Phó từ", "Giới từ"], ans: 2, multi: false, missing: true, tip: "⚠️ Câu 84 bị lỗi mất chữ 已 (dĩ = đã) ở đề trong PDF. Cứ thấy câu '舟已行矣...' bị trống chữ cần tìm là khoanh Phó từ." },
+      { id: 85, sentence: "兩漁翁。", target: "兩", options: ["Số từ", "Liên từ", "Phó từ", "Trợ từ"], ans: 0, multi: false, missing: false, tip: "Chữ 兩 (lưỡng = 2) luôn cố định là Số từ." },
+      { id: 86, sentence: "庭中種桂, 其葉常綠。", target: "常", options: ["Giới từ", "Liên từ", "Trợ từ", "Phó từ"], ans: 3, multi: false, missing: false, tip: "Chữ 常 (thường = luôn) luôn cố định là Phó từ." },
+      { id: 87, sentence: "山之大者, 草, 木生之, 禽獸居之03.", target: "之03", options: ["Phó từ", "Giới từ", "Đại từ", "Trợ từ"], ans: 2, multi: true, missing: false, tip: "Mẹo chữ 之 (之03): Đứng CUỐI CÂU sát trước dấu chấm ('...居之03.') -> Khoanh Đại từ." },
+      { id: 88, sentence: "我國獨立自王始, 可謂女中第一英雄。", target: "中", options: ["Phó từ", "Phương vị từ", "Giới từ", "Liên từ"], ans: 1, multi: false, missing: false, tip: "Chữ 中 (trung = ở trong) luôn cố định là Phương vị từ." },
+      { id: 89, sentence: "誠無窮之利也。", target: "之", options: ["Trợ từ kết cấu", "Phó từ", "Liên từ", "Giới từ"], ans: 0, multi: true, missing: false, tip: "Mẹo chữ 之: Đứng giữa câu ('無窮之利') -> Khoanh Trợ từ kết cấu." },
+      { id: 90, sentence: "人之01身體, 以衣護之, 以食養之。", target: "之01", options: ["Giới từ", "Phó từ", "Trợ từ kết cấu", "Liên từ"], ans: 2, multi: true, missing: false, tip: "Mẹo chữ 之 (之01): Đứng giữa cụm '人之01身體' -> Khoanh Trợ từ kết cấu." },
+      { id: 91, sentence: "人之身體, 以衣護之02, 以食養之。", target: "之02", options: ["Phó từ", "Đại từ", "Trợ từ", "Giới từ"], ans: 1, multi: true, missing: false, tip: "Mẹo chữ 之 (之02): Đứng sát ngay trước dấu phẩy ('...護之02,') -> Khoanh Đại từ." },
+      { id: 92, sentence: "人之身體, 以衣護之, 以食養之03。", target: "之03", options: ["Phó từ", "Trợ từ", "Đại từ", "Giới từ"], ans: 2, multi: true, missing: false, tip: "Mẹo chữ 之 (之03): Đứng CUỐI CÂU sát trước dấu chấm ('...養之03。') -> Khoanh Đại từ." },
+      { id: 93, sentence: "其人弗能應也。", target: "其", options: ["Trợ từ", "Đại từ", "Giới từ", "Phó từ"], ans: 1, multi: false, missing: false, tip: "Chữ 其 (kỳ) luôn cố định 100% là Đại từ." },
+      { id: 94, sentence: "上古有人居焉。", target: "焉", options: ["Giới từ", "Liên từ", "Đại từ", "Phó từ"], ans: 2, multi: false, missing: true, tip: "⚠️ Câu 94 bị lỗi mất chữ 焉 (yên = ở nơi đó) ở đề trong PDF. Cứ thấy câu '上古有人居焉' bị trống chữ ở đề là khoanh Đại từ." },
+      { id: 95, sentence: "因名昇龍, 而都之。", target: "因", options: ["Trợ từ", "Liên từ", "Giới từ", "Phó từ"], ans: 1, multi: true, missing: false, tip: "Mẹo chữ 因: Câu chỉ có 1 chữ 因 ('因名昇龍...') -> Khoanh Liên từ." },
+      { id: 96, sentence: "因戒生, 因定發慧。", target: "因", options: ["Phó từ", "Giới từ", "Trợ từ", "Liên từ"], ans: 1, multi: true, missing: false, tip: "Mẹo chữ 因: Câu lặp lại 2 chữ 因 ('因戒生, 因定發慧') -> Khoanh Giới từ." },
+      { id: 97, sentence: "因名昇龍, 而都之。", target: "之", options: ["Phó từ", "Trợ từ", "Đại từ", "Giới từ"], ans: 2, multi: true, missing: false, tip: "Mẹo chữ 之: Đứng CUỐI CÂU sát trước dấu chấm ('...而都之。') -> Khoanh Đại từ." },
+      { id: 98, sentence: "其角與皮, 皆可制器。", target: "與", options: ["Phó từ", "Liên từ", "Trợ từ", "Giới từ"], ans: 1, multi: false, missing: false, tip: "Chữ 與 (dữ = và) luôn cố định 100% là Liên từ." },
+      { id: 99, sentence: "因名昇龍, 即今之京城也。", target: "也", options: ["Giới từ", "Trợ từ", "Liên từ", "Phó từ"], ans: 1, multi: false, missing: false, tip: "Chữ 也 (dã) đứng cuối câu luôn cố định là Trợ từ." },
+      { id: 100, sentence: "其人弗能應也。", target: "能", options: ["Giới từ", "Liên từ", "Trợ động từ", "Trợ từ"], ans: 2, multi: false, missing: false, tip: "Chữ 能 (năng) luôn cố định là Trợ động từ." },
+      { id: 101, sentence: "時交趾太守蘇定貪殘, 殺其夫。", target: "其", options: ["Trợ từ", "Giới từ", "Phó từ", "Đại từ"], ans: 3, multi: false, missing: false, tip: "Chữ 其 (kỳ) luôn cố định 100% là Đại từ." },
+      { id: 102, sentence: "楚人有鬻矛與盾者。", target: "與", options: ["Phó từ", "Liên từ", "Giới từ", "Trợ từ"], ans: 1, multi: false, missing: false, tip: "Chữ 與 (dữ = và) luôn cố định là Liên từ." },
+      { id: 103, sentence: "建國自立為王, 都麋冷。", target: "自", options: ["Phó từ", "Đại từ", "Giới từ", "Trợ từ"], ans: 1, multi: false, missing: false, tip: "Chữ 自 (tự = tự mình) luôn cố định là Đại từ." },
+      { id: 104, sentence: "我國獨立自王始。", target: "我", options: ["Giới từ", "Phó từ", "Đại từ", "Trợ từ"], ans: 2, multi: false, missing: false, tip: "Chữ 我 (ngã = ta, chúng ta) luôn cố định là Đại từ." },
+      { id: 105, sentence: "我國獨立自王始, 可謂女中第一英雄。", target: "可", options: ["Trợ từ", "Trợ động từ", "Liên từ", "Giới từ"], ans: 1, multi: false, missing: false, tip: "Chữ 可 (khả) luôn cố định là Trợ động từ." },
+      { id: 106, sentence: "金, 玉, 煤, 鐵之屬, 產於其中。", target: "之", options: ["Giới từ", "Trợ từ kết cấu", "Liên từ", "Phó từ"], ans: 1, multi: true, missing: false, tip: "Mẹo chữ 之: Đứng giữa cụm '...鐵之屬' -> Khoanh Trợ từ kết cấu." },
+      { id: 107, sentence: "其人弗能應也。", target: "弗", options: ["Trợ từ", "Đại từ", "Giới từ", "Phó từ"], ans: 3, multi: false, missing: false, tip: "Chữ 弗 (phất = không) luôn cố định là Phó từ." },
+      { id: 108, sentence: "因名昇龍, 即今之京城也。", target: "即", options: ["Giới từ", "Trợ từ", "Liên từ", "Động từ"], ans: 3, multi: true, missing: false, tip: "Mẹo chữ 即: Nằm trong câu dài có dấu phẩy ('因名昇龍, 即今之京城也') -> Khoanh Động từ." },
+      { id: 109, sentence: "覺即覺悟。", target: "即", options: ["Phó từ", "Trợ từ", "Liên từ", "Động từ"], ans: 0, multi: true, missing: false, tip: "Mẹo chữ 即: Nằm trong câu ngắn 4 chữ ('覺即覺悟') -> Khoanh Phó từ." },
+      { id: 110, sentence: "庭中種桂, 其葉常綠。", target: "中", options: ["Phương vị từ", "Liên từ", "Trợ từ", "Phó từ"], ans: 0, multi: false, missing: false, tip: "Chữ 中 (trung = trong) luôn cố định là Phương vị từ." },
+      { id: 111, sentence: "竹簾外, 兩燕子, 忽飛來, 忽飛去。", target: "忽", options: ["Giới từ", "Phó từ", "Phương vị từ", "Liên từ"], ans: 1, multi: false, missing: false, tip: "Chữ 忽 (hốt = bỗng, chợt) luôn cố định là Phó từ." },
+      { id: 112, sentence: "竹簾外, 兩燕子, 忽飛來, 忽飛去。", target: "外", options: ["Giới từ", "Trợ từ", "Phương vị từ", "Liên từ"], ans: 2, multi: false, missing: false, tip: "Chữ 外 (ngoại = ngoài) luôn cố định là Phương vị từ." },
+      { id: 113, sentence: "霜降後, 葉漸黄。", target: "漸", options: ["Phó từ", "Giới từ", "Liên từ", "Trợ từ"], ans: 0, multi: false, missing: false, tip: "Chữ 漸 (tiệm = dần dần) luôn cố định là Phó từ." },
+      { id: 114, sentence: "霜降後, 葉漸黃。", target: "後", options: ["Phó từ", "Phương vị từ", "Liên từ", "Trợ từ"], ans: 1, multi: true, missing: false, tip: "Mẹo chữ 後: Đứng TRƯỚC dấu phẩy ('霜降後,') -> Khoanh Phương vị từ." },
+      { id: 115, sentence: "霜降後, 葉漸黃。", target: "黃", options: ["Phó từ", "Giới từ", "Tính từ", "Trợ từ"], ans: 2, multi: false, missing: false, tip: "Chữ 黃 (hoàng = màu vàng) là chữ DUY NHẤT trong 120 câu có đáp án là Tính từ." },
+      { id: 116, sentence: "富與貴, 是人之所欲也。", target: "與", options: ["Phó từ", "Liên từ", "Đại từ", "Trợ từ"], ans: 1, multi: false, missing: false, tip: "Chữ 與 (dữ = và) luôn cố định là Liên từ." },
+      { id: 117, sentence: "三藏者經藏律藏論藏也。", target: "也", options: ["Phó từ", "Liên từ", "Đại từ", "Trợ từ"], ans: 3, multi: false, missing: false, tip: "Chữ 也 (dã) đứng cuối câu luôn cố định là Trợ từ." },
+      { id: 118, sentence: "有朋自遠方來, 不亦樂乎。", target: "乎", options: ["Liên từ", "Trợ từ", "Phó từ", "Giới từ"], ans: 1, multi: false, missing: false, tip: "Chữ 乎 (hồ) đứng cuối câu luôn cố định là Trợ từ." },
+      { id: 119, sentence: "汝願諧矣。", target: "矣", options: ["Phó từ", "Liên từ", "Đại từ", "Trợ từ"], ans: 3, multi: false, missing: false, tip: "Chữ 矣 (hĩ) đứng cuối câu luôn cố định là Trợ từ." },
+      { id: 120, sentence: "今爾向日而行, 是為東方。", target: "爾", options: ["Đại từ", "Phó từ", "Giới từ", "Trợ từ"], ans: 0, multi: false, missing: false, tip: "Chữ 爾 (nhĩ = ngươi, bạn) luôn cố định là Đại từ." }
+    ];
+
+    const LETTERS = ['a', 'b', 'c', 'd'];
+    let currentMode = 'exam';
+    let examQuestions = [];
+    let examAnswers = {}; // { qId: chosenIndex }
+    let practiceAnswers = {}; // { qId: chosenIndex }
+    let currentFilter = 'all';
+
+    function switchMode(mode) {
+      currentMode = mode;
+      ['exam', 'practice', 'cheatsheet'].forEach(m => {
+        document.getElementById(`view-${m}`).classList.toggle('hidden', m !== mode);
+        const btn = document.getElementById(`tab-${m}`);
+        if (m === mode) {
+          btn.className = "px-3 py-1.5 rounded-lg text-xs md:text-sm font-semibold bg-white text-amber-900 shadow-sm transition";
+        } else {
+          btn.className = "px-3 py-1.5 rounded-lg text-xs md:text-sm font-semibold bg-amber-700 text-amber-100 hover:bg-amber-600 transition";
+        }
+      });
+      if (mode === 'practice') renderPracticeList();
+    }
+
+    function highlightSentence(sentence, target) {
+      const cleanTarget = target.replace(/0[123]/g, '');
+      if (sentence.includes(target)) {
+        return sentence.replace(target, `<span class="bg-amber-200 text-amber-950 px-1.5 py-0.5 rounded font-bold underline decoration-2">${target}</span>`);
+      }
+      return sentence.replace(new RegExp(cleanTarget, 'g'), `<span class="bg-amber-200 text-amber-950 px-1.5 py-0.5 rounded font-bold underline decoration-2">${cleanTarget}</span>`);
+    }
+
+    // EXAM MODE FUNCTIONS
+    function startNewExam() {
+      const officialPool = QUESTIONS.filter(q => !q.removed);
+      const shuffled = [...officialPool].sort(() => Math.random() - 0.5);
+      examQuestions = shuffled.slice(0, 20);
+      examAnswers = {};
+      renderExamList();
+    }
+
+    function selectExamAnswer(qId, optIdx) {
+      examAnswers[qId] = optIdx;
+      renderExamList();
+      updatePracticeStats();
+    }
+
+    function renderExamList() {
+      const container = document.getElementById('exam-questions-list');
+      let correctCount = 0;
+      examQuestions.forEach(q => {
+        if (examAnswers[q.id] === q.ans) correctCount++;
+      });
+      const score = (correctCount * 0.5).toFixed(1);
+      document.getElementById('exam-score-badge').textContent = `${score} / 10`;
+
+      container.innerHTML = examQuestions.map((q, idx) => {
+        const chosen = examAnswers[q.id];
+        const isAnswered = chosen !== undefined;
+        return buildQuestionCard(q, idx + 1, chosen, isAnswered, 'exam');
+      }).join('');
+    }
+
+    // PRACTICE MODE FUNCTIONS
+    function setFilter(f) {
+      currentFilter = f;
+      ['all', 'multi', 'missing', 'fixed', 'wrong'].forEach(k => {
+        const btn = document.getElementById(`filter-${k}`);
+        if (k === f) {
+          btn.className = "px-3 py-1.5 rounded-lg text-xs font-semibold bg-amber-700 text-white";
+        } else if (k === 'wrong') {
+          btn.className = "px-3 py-1.5 rounded-lg text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100";
+        } else {
+          btn.className = "px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200";
+        }
+      });
+      renderPracticeList();
+    }
+
+    function selectPracticeAnswer(qId, optIdx) {
+      practiceAnswers[qId] = optIdx;
+      renderPracticeList();
+    }
+
+    function resetPractice() {
+      practiceAnswers = {};
+      renderPracticeList();
+    }
+
+    function updatePracticeStats() {
+      const answeredIds = Object.keys(practiceAnswers);
+      let correct = 0;
+      let wrong = 0;
+      answeredIds.forEach(id => {
+        const q = QUESTIONS.find(item => item.id === Number(id));
+        if (practiceAnswers[id] === q.ans) correct++;
+        else wrong++;
+      });
+      document.getElementById('practice-stats').textContent = `Đã làm: ${answeredIds.length}/120 • Đúng: ${correct} • Sai: ${wrong}`;
+      document.getElementById('wrong-count').textContent = wrong;
+    }
+
+    function renderPracticeList() {
+      updatePracticeStats();
+      const query = (document.getElementById('search-input')?.value || '').trim().toLowerCase();
+      const alwaysShowHint = document.getElementById('auto-show-hint')?.checked;
+
+      const filtered = QUESTIONS.filter(q => {
+        if (currentFilter === 'multi' && !q.multi) return false;
+        if (currentFilter === 'missing' && !q.missing) return false;
+        if (currentFilter === 'fixed' && q.multi) return false;
+        if (currentFilter === 'wrong' && (practiceAnswers[q.id] === undefined || practiceAnswers[q.id] === q.ans)) return false;
+        if (query) {
+          const matchId = String(q.id) === query;
+          const matchText = q.sentence.toLowerCase().includes(query) || q.target.toLowerCase().includes(query);
+          return matchId || matchText;
+        }
+        return true;
+      });
+
+      const container = document.getElementById('practice-questions-list');
+      if (filtered.length === 0) {
+        container.innerHTML = `<div class="bg-white p-8 rounded-2xl text-center text-slate-500 border border-slate-200">Không có câu hỏi nào khớp với bộ lọc hiện tại.</div>`;
+        return;
+      }
+
+      container.innerHTML = filtered.map(q => {
+        const chosen = practiceAnswers[q.id];
+        const isAnswered = chosen !== undefined;
+        return buildQuestionCard(q, null, chosen, isAnswered || alwaysShowHint, 'practice');
+      }).join('');
+    }
+
+    function buildQuestionCard(q, examOrder, chosen, showTip, mode) {
+      const selectFn = mode === 'exam' ? `selectExamAnswer(${q.id}, ` : `selectPracticeAnswer(${q.id}, `;
+      const badges = [];
+      if (q.multi) badges.push(`<span class="px-2 py-0.5 text-[11px] font-semibold bg-amber-100 text-amber-800 rounded-md">⚠️ Chữ có nhiều vai trò</span>`);
+      else badges.push(`<span class="px-2 py-0.5 text-[11px] font-semibold bg-emerald-50 text-emerald-700 rounded-md">✅ 1 Đáp án cố định</span>`);
+      if (q.missing) badges.push(`<span class="px-2 py-0.5 text-[11px] font-semibold bg-rose-100 text-rose-800 rounded-md">🔍 Đề PDF bị khuyết chữ</span>`);
+      if (q.removed) badges.push(`<span class="px-2 py-0.5 text-[11px] font-semibold bg-slate-200 text-slate-700 rounded-md">File mới giảm tải</span>`);
+
+      const optionsHtml = q.options.map((opt, idx) => {
+        let btnStyle = "border-slate-200 bg-slate-50 hover:bg-amber-50 hover:border-amber-300 text-slate-700";
+        let icon = "";
+        if (chosen !== undefined) {
+          if (idx === q.ans) {
+            btnStyle = "border-emerald-500 bg-emerald-50 text-emerald-900 font-bold ring-2 ring-emerald-200";
+            icon = " ✔️";
+          } else if (idx === chosen && chosen !== q.ans) {
+            btnStyle = "border-rose-500 bg-rose-50 text-rose-900 font-semibold line-through";
+            icon = " ❌";
+          } else {
+            btnStyle = "border-slate-200 bg-white text-slate-400 opacity-75";
+          }
+        }
+        return `
+          <button onclick="${selectFn}${idx})" class="text-left px-4 py-2.5 rounded-xl border text-sm transition flex items-center justify-between ${btnStyle}">
+            <span><b class="uppercase mr-1.5">${LETTERS[idx]}/</b> ${opt}</span>
+            <span>${icon}</span>
+          </button>
+        `;
+      }).join('');
+
+      return `
+        <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200 space-y-3.5">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div class="flex items-center gap-2">
+              <span class="px-2.5 py-1 bg-slate-800 text-white text-xs font-bold rounded-lg">
+                ${examOrder ? `Câu ${examOrder} (Đề cương #${q.id})` : `Câu ${q.id}/120`}
+              </span>
+              ${badges.join('')}
+            </div>
+            <span class="text-xs text-slate-400">Đáp án chuẩn: <b class="uppercase text-slate-600">${chosen !== undefined ? LETTERS[q.ans] : '?'}</b></span>
+          </div>
+
+          <div class="text-base md:text-lg text-slate-800 leading-relaxed">
+            <span class="hanzi text-xl md:text-2xl font-bold tracking-wide">${highlightSentence(q.sentence, q.target)}</span>
+            <span class="ml-1 text-sm md:text-base text-slate-700">
+              Trong câu này, <b class="hanzi text-xl text-rose-700 bg-rose-50 px-2 py-0.5 rounded border border-rose-200">${q.target}</b> ${q.missing ? '<span class="text-xs text-rose-600 font-normal">(trong PDF bị bỏ trống)</span>' : ''} là:
+            </span>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2.5">
+            ${optionsHtml}
+          </div>
+
+          ${showTip ? `
+            <div class="p-3 rounded-xl bg-amber-50/80 border border-amber-200 text-xs md:text-sm text-amber-950 flex items-start gap-2">
+              <span class="text-base">💡</span>
+              <div><b>Mẹo giải nhanh:</b> ${q.tip}</div>
+            </div>
+          ` : ''}
+        </div>
+      `;
+    }
+
+    // Initialize Exam on load
+    startNewExam();
+  </script>
+</body>
+</html>
